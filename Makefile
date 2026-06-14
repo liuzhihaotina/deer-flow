@@ -7,13 +7,13 @@ BACKEND_UV_RUN = cd backend && uv run
 
 # Detect OS for Windows compatibility
 ifeq ($(OS),Windows_NT)
-    SHELL := cmd.exe
-    PYTHON ?= python
-    # Run repo shell scripts through Git Bash when Make is launched from cmd.exe / PowerShell.
-    RUN_WITH_GIT_BASH = call scripts\run-with-git-bash.cmd
+	SHELL := cmd.exe
+	PYTHON ?= python
+	# Run repo shell scripts through Git Bash when Make is launched from cmd.exe / PowerShell.
+	RUN_WITH_GIT_BASH = call scripts\run-with-git-bash.cmd
 else
-    PYTHON ?= python3
-    RUN_WITH_GIT_BASH =
+	PYTHON ?= python3
+	RUN_WITH_GIT_BASH =
 endif
 
 help:
