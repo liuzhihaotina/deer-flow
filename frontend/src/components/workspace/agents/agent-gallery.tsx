@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useAgents } from "@/core/agents";
+import { buildTemplateCreateUrl, LOCAL_TABLE_TEMPLATE } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 
 import { AgentCard } from "./agent-card";
@@ -32,6 +33,25 @@ export function AgentGallery() {
           <PlusIcon className="mr-1.5 h-4 w-4" />
           {t.agents.newAgent}
         </Button>
+      </div>
+
+      {/* Template shortcut */}
+      <div className="border-b px-6 py-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">模板快速创建</p>
+            <p className="text-muted-foreground text-xs">
+              先选模板，再输入新智能体名称，即可复用提示词快速生成。
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(buildTemplateCreateUrl(LOCAL_TABLE_TEMPLATE.name))}
+          >
+            使用本地表格模板
+          </Button>
+        </div>
       </div>
 
       {/* Content */}

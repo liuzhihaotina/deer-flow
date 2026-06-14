@@ -8,8 +8,8 @@ import {
   MoreHorizontalIcon,
   SaveIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { toast } from "sonner";
 
 import {
@@ -37,6 +37,7 @@ import {
   checkAgentName,
   getAgent,
 } from "@/core/agents/api";
+import { getAgentTemplate } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 import { useThreadStream } from "@/core/threads/hooks";
 import { uuid } from "@/core/utils/uuid";
@@ -73,6 +74,11 @@ async function getAgentWithRetry(agentName: string) {
 export default function NewAgentPage() {
   const { t } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const template = useMemo(
+    () => getAgentTemplate(searchParams.get("template")),
+    [searchParams],
+  );
 
   const [step, setStep] = useState<Step>("name");
   const [nameInput, setNameInput] = useState("");
@@ -150,15 +156,6 @@ export default function NewAgentPage() {
         err instanceof AgentNameCheckError &&
         err.reason === "request_failed"
       ) {
-        // Surface the backend-provided detail (e.g. validation error) when
-        // one is present, wrapped in a localised prefix so zh-CN users
-        // don't see a bare English string next to the surrounding Chinese
-        // UI. Falls back to the generic localised fallback when the backend
-        // sent no detail — `err.message` is unreliable for this branch
-        // because `checkAgentName` substitutes a generated fallback string
-        // ("Failed to check agent name: ${statusText}") when `detail` is
-        // missing, so testing `err.message` would always be truthy and the
-        // generated fallback would leak through.
         setNameError(
           err.detail
             ? t.agents.nameStepCheckErrorWithDetail.replace(
@@ -177,10 +174,15 @@ export default function NewAgentPage() {
 
     setAgentName(trimmed);
     setStep("chat");
+
+    const bootstrapText = template
+      ? `${template.prompt}\n\n请基于以上模板创建一个名为「${trimmed}」的智能体，并在关键修改前给出可人工校正的中间结果。`
+      : t.agents.nameStepBootstrapMessage.replace("{name}", trimmed);
+
     await sendMessage(
       threadId,
       {
-        text: t.agents.nameStepBootstrapMessage.replace("{name}", trimmed),
+        text: bootstrapText,
         files: [],
       },
       { agent_name: trimmed },
@@ -195,10 +197,11 @@ export default function NewAgentPage() {
     t.agents.nameStepCheckError,
     t.agents.nameStepCheckErrorWithDetail,
     t.agents.nameStepInvalidError,
+    template,
     threadId,
   ]);
 
-  const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleNameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !isIMEComposing(e)) {
       e.preventDefault();
       void handleConfirmName();
@@ -308,7 +311,7 @@ export default function NewAgentPage() {
                   {t.agents.nameStepTitle}
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  {t.agents.nameStepHint}
+                  {template ? template.description : t.agents.nameStepHint}
                 </p>
               </div>
             </div>

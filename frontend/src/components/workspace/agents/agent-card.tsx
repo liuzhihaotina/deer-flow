@@ -1,6 +1,6 @@
 "use client";
 
-import { BotIcon, MessageSquareIcon, Trash2Icon } from "lucide-react";
+import { BotIcon, MessageSquareIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type ComponentProps, type ReactElement, useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useDeleteAgent } from "@/core/agents";
 import type { Agent } from "@/core/agents";
+import { buildTemplateCreateUrl, isTemplateAgent } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 import { cn } from "@/lib/utils";
 
@@ -37,12 +38,6 @@ interface AgentCardProps {
   agent: Agent;
 }
 
-/**
- * Reveals the full text in a tooltip ONLY when its trigger is actually clipped.
- * Clipping is measured on pointer enter against the trigger's own box, covering
- * both single-line `truncate` (width) and multi-line `line-clamp` (height), so
- * untruncated content never pops a redundant tooltip.
- */
 function TruncatedTooltip({
   text,
   children,
@@ -58,8 +53,7 @@ function TruncatedTooltip({
         onPointerEnter={(e) => {
           const el = e.currentTarget;
           setTruncated(
-            el.scrollWidth > el.clientWidth ||
-              el.scrollHeight > el.clientHeight,
+            el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight,
           );
         }}
       >
@@ -74,11 +68,6 @@ function TruncatedTooltip({
   );
 }
 
-/**
- * Long, user-controlled labels (agent model, skills, tool groups) that must
- * never break the card layout: width is capped to the parent and the text is
- * truncated with an ellipsis, with the full value revealed on hover.
- */
 function TruncatedBadge({
   label,
   variant,
@@ -177,11 +166,24 @@ export function AgentCard({ agent }: AgentCardProps) {
           </CardContent>
         )}
 
-        <CardFooter className="mt-auto flex items-center justify-between gap-2 pt-3">
-          <Button size="sm" className="flex-1" onClick={handleChat}>
-            <MessageSquareIcon className="mr-1.5 h-3.5 w-3.5" />
-            {t.agents.chat}
-          </Button>
+        <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
+          <div className="flex flex-1 gap-2">
+            {isTemplateAgent(agent) ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() => router.push(buildTemplateCreateUrl(agent.name))}
+              >
+                <PlusIcon className="mr-1.5 h-3.5 w-3.5" />
+                使用模板
+              </Button>
+            ) : null}
+            <Button size="sm" className="flex-1" onClick={handleChat}>
+              <MessageSquareIcon className="mr-1.5 h-3.5 w-3.5" />
+              {t.agents.chat}
+            </Button>
+          </div>
           <div className="flex gap-1">
             <Button
               size="icon"
@@ -196,7 +198,6 @@ export function AgentCard({ agent }: AgentCardProps) {
         </CardFooter>
       </Card>
 
-      {/* Delete Confirm */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
