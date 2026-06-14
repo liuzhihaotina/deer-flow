@@ -97,9 +97,13 @@ class AppConfig(BaseModel):
     token_usage: TokenUsageConfig = Field(default_factory=TokenUsageConfig, description="Token usage tracking configuration")
     models: list[ModelConfig] = Field(default_factory=list, description="Available models")
     sandbox: SandboxConfig = Field(
+        default_factory=lambda: SandboxConfig(
+            use="deerflow.sandbox.local:LocalSandboxProvider",
+            allow_host_bash=True,
+        ),
         description=format_field_description(
             "sandbox",
-            field_doc="Sandbox provider configuration (local filesystem or Docker-based aio sandbox).",
+            field_doc="Sandbox provider configuration (local filesystem or Docker-based aio sandbox). Defaults to the local sandbox provider for backward compatibility with older config files.",
         ),
     )
     tools: list[ToolConfig] = Field(default_factory=list, description="Available tools")

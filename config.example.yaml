@@ -33,6 +33,16 @@ token_usage:
   enabled: true
 
 # ============================================================================
+# Sandbox Configuration
+# ============================================================================
+# Required sandbox provider configuration used by the gateway and tools.
+# For local development, the built-in LocalSandboxProvider is the safest
+# minimal option.
+sandbox:
+  use: deerflow.sandbox.local:LocalSandboxProvider
+  allow_host_bash: true
+
+# ============================================================================
 # Models Configuration
 # ============================================================================
 # Configure available LLM models for the agent to use

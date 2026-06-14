@@ -142,6 +142,7 @@ services:
       - ../extensions_config.json:/app/extensions_config.json
       - ../skills:/app/skills
       - ../logs:/app/logs
+      - D:/_tina/learning/test:/mnt/test
       # Use a Docker-managed uv cache volume instead of a host bind mount.
       # On macOS/Docker Desktop, uv may fail to create symlinks inside shared
       # host directories, which causes startup-time `uv sync` to crash.

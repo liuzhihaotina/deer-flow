@@ -7,7 +7,8 @@ ARG PNPM_STORE_PATH=/root/.local/share/pnpm/store
 ARG NPM_REGISTRY
 
 # ── Base: shared setup ────────────────────────────────────────────────────────
-FROM node:22-alpine AS base
+ARG NODE_IMAGE=mirror.gcr.io/library/node:22-alpine
+FROM ${NODE_IMAGE} AS base
 ARG PNPM_STORE_PATH
 ARG NPM_REGISTRY
 # Configure corepack registry before installing pnpm so the download itself
@@ -35,7 +36,7 @@ RUN cd /app/frontend && pnpm install --frozen-lockfile
 RUN cd /app/frontend && SKIP_ENV_VALIDATION=1 pnpm build
 
 # ── Prod: minimal runtime with pre-built output ───────────────────────────────
-FROM node:22-alpine AS prod
+FROM ${NODE_IMAGE} AS prod
 ARG PNPM_STORE_PATH
 ARG NPM_REGISTRY
 RUN if [ -n "${NPM_REGISTRY}" ]; then \
