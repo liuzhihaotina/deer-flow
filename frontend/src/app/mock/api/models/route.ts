@@ -29,6 +29,13 @@ export function GET() {
         display_name: "Gemini 3 Pro",
         supports_thinking: true,
       },
+      {
+        id: "claude-opus-4-6",
+        name: "claude-opus-4-6",
+        model: "claude-opus-4-6",
+        display_name: "Claude Opus 4.6",
+        supports_thinking: true,
+      },
     ],
   });
 }

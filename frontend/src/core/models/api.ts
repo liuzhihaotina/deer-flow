@@ -1,3 +1,4 @@
+import { fetch as fetchWithAuth } from "../api/fetcher";
 import { getBackendBaseURL } from "../config";
 import { isStaticWebsiteOnly } from "../static-mode";
 
@@ -13,7 +14,11 @@ export async function loadModels(): Promise<ModelsResponse> {
     return STATIC_MODELS_RESPONSE;
   }
 
-  const res = await fetch(`${getBackendBaseURL()}/api/models`);
+  const res = await fetchWithAuth(`${getBackendBaseURL()}/api/models`);
+  if (!res.ok) {
+    return STATIC_MODELS_RESPONSE;
+  }
+
   const data = (await res.json()) as Partial<ModelsResponse>;
   return {
     models: data.models ?? [],
