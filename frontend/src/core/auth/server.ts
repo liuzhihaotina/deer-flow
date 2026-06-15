@@ -60,8 +60,11 @@ export async function getServerSideUser(): Promise<AuthResult> {
           return { tag: "system_setup_required" };
         }
       }
-    } catch {
+    } catch (err) {
       clearTimeout(setupTimeout);
+      if (!(err instanceof DOMException && err.name === "AbortError")) {
+        console.error("[SSR auth] Failed to reach setup-status:", err);
+      }
       // If setup-status is unreachable/times out, fall through to unauthenticated.
     }
     return { tag: "unauthenticated" };
@@ -96,7 +99,9 @@ export async function getServerSideUser(): Promise<AuthResult> {
     return { tag: "gateway_unavailable" };
   } catch (err) {
     clearTimeout(timeout);
-    console.error("[SSR auth] Failed to reach gateway:", err);
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      console.error("[SSR auth] Failed to reach gateway:", err);
+    }
     return { tag: "gateway_unavailable" };
   }
 }

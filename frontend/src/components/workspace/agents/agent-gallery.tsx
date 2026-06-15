@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useAgents } from "@/core/agents";
-import { buildTemplateCreateUrl, LOCAL_TABLE_TEMPLATE } from "@/core/agents/templates";
+import { buildTemplateCreateUrl } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 
 import { AgentCard } from "./agent-card";
@@ -14,6 +14,9 @@ export function AgentGallery() {
   const { t } = useI18n();
   const { agents, isLoading } = useAgents();
   const router = useRouter();
+
+  const localTableTemplateName = "local-table-processor";
+  const msgInputLoggerTemplateName = "msg-input-logger";
 
   const handleNewAgent = () => {
     router.push("/workspace/agents/new");
@@ -44,13 +47,22 @@ export function AgentGallery() {
               先选模板，再输入新智能体名称，即可复用提示词快速生成。
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(buildTemplateCreateUrl(LOCAL_TABLE_TEMPLATE.name))}
-          >
-            使用本地表格模板
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(buildTemplateCreateUrl(localTableTemplateName))}
+            >
+              使用本地表格模板
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(buildTemplateCreateUrl(msgInputLoggerTemplateName))}
+            >
+              使用消息记录模板
+            </Button>
+          </div>
         </div>
       </div>
 
