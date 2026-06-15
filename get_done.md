@@ -239,5 +239,9 @@ make up
 ```bash
 make docker-start
 ```
+后面不构建执行
+```bash
+docker compose -p deer-flow-dev -f docker-compose-dev.yaml up -d --no-build
+```
 
 

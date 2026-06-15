@@ -291,6 +291,12 @@ if $DAEMON_MODE; then
     MODE_LABEL="$MODE_LABEL [daemon]"
 fi
 
+# Default local development to auth-disabled mode so the app opens directly
+# without a login step. Production / explicit overrides still win.
+if $DEV_MODE && [ -z "${DEER_FLOW_AUTH_DISABLED+x}" ]; then
+    export DEER_FLOW_AUTH_DISABLED=1
+fi
+
 # Frontend command
 if $DEV_MODE; then
     FRONTEND_CMD="pnpm run dev"
