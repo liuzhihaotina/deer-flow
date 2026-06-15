@@ -18,6 +18,7 @@ def setup_agent(
     soul: str,
     description: str,
     runtime: Runtime,
+    model: str | None = None,
     skills: list[str] | None = None,
 ) -> Command:
     """Setup the custom DeerFlow agent.
@@ -25,6 +26,7 @@ def setup_agent(
     Args:
         soul: Full SOUL.md content defining the agent's personality and behavior.
         description: One-line description of what the agent does.
+        model: Optional default model name for this agent.
         skills: Optional list of skill names this agent should use. None means use all enabled skills, empty list means no skills.
     """
 
@@ -70,6 +72,8 @@ def setup_agent(
             config_data: dict = {"name": agent_name}
             if description:
                 config_data["description"] = description
+            if model is not None:
+                config_data["model"] = model
             if skills is not None:
                 config_data["skills"] = skills
 

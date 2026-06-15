@@ -39,6 +39,7 @@ import {
 } from "@/core/agents/api";
 import { getAgentTemplate } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
+import { useModels } from "@/core/models/hooks";
 import { useThreadStream } from "@/core/threads/hooks";
 import { uuid } from "@/core/utils/uuid";
 import { isIMEComposing } from "@/lib/ime";
@@ -89,8 +90,17 @@ export default function NewAgentPage() {
   const [showSaveHint, setShowSaveHint] = useState(false);
   const [setupAgentStatus, setSetupAgentStatus] =
     useState<SetupAgentStatus>("idle");
+  const [selectedModel, setSelectedModel] = useState("");
 
   const threadId = useMemo(() => uuid(), []);
+  const { models, isLoading: isLoadingModels } = useModels();
+
+  useEffect(() => {
+    if (selectedModel || models.length === 0) {
+      return;
+    }
+    setSelectedModel(models[0]!.name);
+  }, [models, selectedModel]);
 
   const { thread, sendMessage } = useThreadStream({
     threadId: undefined,
@@ -185,11 +195,12 @@ export default function NewAgentPage() {
         text: bootstrapText,
         files: [],
       },
-      { agent_name: trimmed },
+      { agent_name: trimmed, model_name: selectedModel || undefined },
     );
   }, [
     nameInput,
     sendMessage,
+    selectedModel,
     t.agents.nameStepAlreadyExistsError,
     t.agents.nameStepApiDisabledError,
     t.agents.nameStepNetworkError,
@@ -215,10 +226,10 @@ export default function NewAgentPage() {
       await sendMessage(
         threadId,
         { text: trimmed, files: [] },
-        { agent_name: agentName },
+        { agent_name: agentName, model_name: selectedModel || undefined },
       );
     },
-    [agentName, sendMessage, thread.isLoading, threadId],
+    [agentName, selectedModel, sendMessage, thread.isLoading, threadId],
   );
 
   const handleSaveAgent = useCallback(async () => {
@@ -237,7 +248,7 @@ export default function NewAgentPage() {
       await sendMessage(
         threadId,
         { text: t.agents.saveCommandMessage, files: [] },
-        { agent_name: agentName },
+        { agent_name: agentName, model_name: selectedModel || undefined },
         { additionalKwargs: { hide_from_ui: true } },
       );
       toast.success(t.agents.saveRequested);
@@ -248,6 +259,7 @@ export default function NewAgentPage() {
   }, [
     agent,
     agentName,
+    selectedModel,
     sendMessage,
     setupAgentStatus,
     t.agents.saveCommandMessage,
@@ -328,6 +340,29 @@ export default function NewAgentPage() {
                 onKeyDown={handleNameKeyDown}
                 className={cn(nameError && "border-destructive")}
               />
+
+              <div className="space-y-2">
+                <label className="text-muted-foreground text-xs font-medium">
+                  默认模型
+                </label>
+                <select
+                  className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  disabled={isLoadingModels || models.length === 0}
+                >
+                  {models.length === 0 ? (
+                    <option value="">暂无可用模型</option>
+                  ) : (
+                    models.map((model) => (
+                      <option key={model.name} value={model.name}>
+                        {model.display_name || model.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
               {nameError ? (
                 <p className="text-destructive text-sm">{nameError}</p>
               ) : null}
