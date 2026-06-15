@@ -131,3 +131,113 @@ make docker-stop
 ```bash
 make docker-start
 ```
+
+## 11. Ubuntu 上使用 Docker 部署 DeerFlow
+
+如果你是在 **Ubuntu / Linux** 上部署，并且希望像上面的 Windows Docker 方案一样直接用 Docker 跑 DeerFlow，可以按下面的方式操作。
+
+### 11.1 准备系统环境
+
+先确保 Ubuntu 已安装并启动 Docker：
+- 安装 **Docker Engine** 和 **Docker Compose**
+- 确认 Docker 服务已启动
+- 当前用户已加入 `docker` 组，避免执行 `docker` / `make docker-start` 时出现权限错误
+
+如果提示无法连接 Docker Daemon，可以执行一次：
+```bash
+sudo usermod -aG docker $USER
+```
+然后重新登录当前用户会话。
+
+### 11.2 准备项目配置
+
+进入项目根目录后执行：
+```bash
+make config
+```
+
+然后编辑：
+- `config.yaml`：配置模型、sandbox、运行参数
+- `.env`：配置 API Key、代理、其他环境变量
+
+如果你打算直接编辑完整模板，也可以参考 `config.example.yaml`。
+
+### 11.3 配置模型与 API Key
+
+和 Windows 一样，推荐使用 OpenAI 兼容接口或你自己的模型服务。例如在 `config.yaml` 里配置：
+- `use: langchain_openai:ChatOpenAI`
+- `model: 你的模型名`
+- `base_url: https://你的兼容接口/v1`
+- `api_key: $OPENAI_API_KEY`
+
+并在 `.env` 里写入：
+```bash
+OPENAI_API_KEY=your-api-key-here
+```
+
+如果还需要搜索能力，也可以按 README 的配置补充 `TAVILY_API_KEY` 或其他搜索服务 Key。
+
+### 11.4 启动 Docker 模式
+
+如果你是开发/调试用途，推荐先执行：
+```bash
+make docker-init
+make docker-start
+```
+
+说明：
+- `make docker-init` 会预拉取 sandbox 镜像，适合第一次启动前执行
+- `make docker-start` 会启动 DeerFlow 的 Docker 服务
+- 如果 `config.yaml` 里使用的是 provisioner sandbox 模式，`make docker-start` 会按需启动 provisioner
+
+如果你希望以更接近生产的方式运行，则使用：
+```bash
+make up
+```
+
+停止服务使用：
+```bash
+make down
+```
+
+### 11.5 Ubuntu 部署时的补充建议
+
+- Linux + Docker 是官方更推荐的持续运行环境
+- 如果网络访问 Docker Hub / GHCR 较慢，可以在启动前设置镜像源或代理
+- 如果想加速 Python / Node 依赖下载，可以先导出：
+  ```bash
+  export UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+  export NPM_REGISTRY=https://registry.npmmirror.com
+  ```
+- 若需要局域网访问，可以像 Windows 一样使用 `http://Ubuntu机器IP:2026`
+- 如使用防火墙，请放行 `2026` 端口
+
+### 11.6 Ubuntu 版最简流程
+
+```bash
+make config
+# 编辑 config.yaml 和 .env
+make docker-init
+make docker-start
+```
+
+访问：
+```text
+http://localhost:2026
+```
+
+如果要停止：
+```bash
+make docker-stop
+```
+
+如果要以生产方式启动：
+```bash
+make up
+```
+如需重启，执行
+```bash
+make docker-start
+```
+
+
