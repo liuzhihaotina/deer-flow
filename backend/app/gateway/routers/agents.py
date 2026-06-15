@@ -29,6 +29,7 @@ class AgentResponse(BaseModel):
     tool_groups: list[str] | None = Field(default=None, description="Optional tool group whitelist")
     skills: list[str] | None = Field(default=None, description="Optional skill whitelist (None=all, []=none)")
     soul: str | None = Field(default=None, description="SOUL.md content")
+    template: bool = Field(default=False, description="Whether this agent is a template entry")
 
 
 class AgentsListResponse(BaseModel):
@@ -101,6 +102,7 @@ def _agent_config_to_response(agent_cfg: AgentConfig, include_soul: bool = False
         tool_groups=agent_cfg.tool_groups,
         skills=agent_cfg.skills,
         soul=soul,
+        template=agent_cfg.template,
     )
 
 
@@ -319,6 +321,8 @@ async def update_agent(name: str, request: AgentUpdateRequest) -> AgentResponse:
                 "name": agent_cfg.name,
                 "description": request.description if "description" in fields_set else agent_cfg.description,
             }
+            if agent_cfg.template:
+                updated["template"] = True
             new_model = request.model if "model" in fields_set else agent_cfg.model
             if new_model is not None:
                 updated["model"] = new_model

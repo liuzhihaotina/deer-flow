@@ -15,8 +15,7 @@ export function AgentGallery() {
   const { agents, isLoading } = useAgents();
   const router = useRouter();
 
-  const localTableTemplateName = "local-table-processor";
-  const msgInputLoggerTemplateName = "msg-input-logger";
+  const templateAgents = agents.filter((agent) => agent.template);
 
   const handleNewAgent = () => {
     router.push("/workspace/agents/new");
@@ -39,32 +38,30 @@ export function AgentGallery() {
       </div>
 
       {/* Template shortcut */}
-      <div className="border-b px-6 py-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium">模板快速创建</p>
-            <p className="text-muted-foreground text-xs">
-              先选模板，再输入新智能体名称，即可复用提示词快速生成。
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(buildTemplateCreateUrl(localTableTemplateName))}
-            >
-              使用本地表格模板
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(buildTemplateCreateUrl(msgInputLoggerTemplateName))}
-            >
-              使用消息记录模板
-            </Button>
+      {templateAgents.length > 0 ? (
+        <div className="border-b px-6 py-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">模板快速创建</p>
+              <p className="text-muted-foreground text-xs">
+                先选模板，再输入新智能体名称，即可复用提示词快速生成。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {templateAgents.map((agent) => (
+                <Button
+                  key={agent.name}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(buildTemplateCreateUrl(agent.name))}
+                >
+                  使用 {agent.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">

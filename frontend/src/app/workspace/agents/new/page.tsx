@@ -37,7 +37,7 @@ import {
   checkAgentName,
   getAgent,
 } from "@/core/agents/api";
-import { getAgentTemplate } from "@/core/agents/templates";
+import { loadAgentTemplate } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 import { useModels } from "@/core/models/hooks";
 import { useThreadStream } from "@/core/threads/hooks";
@@ -76,10 +76,25 @@ export default function NewAgentPage() {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const template = useMemo(
-    () => getAgentTemplate(searchParams.get("template")),
-    [searchParams],
-  );
+  const templateName = searchParams.get("template");
+  const [template, setTemplate] = useState<Awaited<ReturnType<typeof loadAgentTemplate>>>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTemplate(null);
+
+    void loadAgentTemplate(templateName)
+      .then((loaded) => {
+        if (!cancelled) setTemplate(loaded);
+      })
+      .catch(() => {
+        if (!cancelled) setTemplate(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [templateName]);
 
   const [step, setStep] = useState<Step>("name");
   const [nameInput, setNameInput] = useState("");
