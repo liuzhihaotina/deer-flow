@@ -243,5 +243,38 @@ make docker-start
 ```bash
 docker compose -p deer-flow-dev -f docker-compose-dev.yaml up -d --no-build
 ```
+# 记录用法更新
 
+已完成这次“模板可选项兜底”改造：把现有两个 agent 模板固化成前端本地模板文件，并让新建页优先从本地模板加载，找不到时再回退后端 agent 查询。这样即使前端暂时看不到模板选择按钮，用户仍可通过 `?template=local-table-processor` 或 `?template=msg-input-logger` 直接按指定模板创建新智能体。
 
+# 命令记录
+🚀 最推荐你的方案（稳定）
+
+你刚才的思路其实是对的 👍
+
+👉 直接复用 Windows 构建好的最终镜像
+
+而不是折腾基础镜像 + 构建
+
+✅ 最优方案（强烈建议）
+在 Windows：
+docker save -o deerflow-final.tar \
+  deer-flow-dev-gateway:latest \
+  deer-flow-dev-frontend:latest \
+  nginx:alpine
+在 Ubuntu：
+docker load -i deerflow-final.tar
+
+然后跳过 build：
+
+cd docker
+
+docker compose -p deer-flow-dev \
+  -f docker-compose-dev.yaml \
+  up -d --no-build
+❗总结一句话
+
+👉 你说的是对的，但要补一句：
+
+docker-init 不生成镜像
+docker-start 第一次才 build 最终镜像（并依赖一堆基础镜像 + 中间镜像）

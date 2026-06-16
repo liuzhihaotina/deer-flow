@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useAgents } from "@/core/agents";
-import { buildTemplateCreateUrl } from "@/core/agents/templates";
+import { buildTemplateCreateUrl, listLocalAgentTemplates } from "@/core/agents/templates";
 import { useI18n } from "@/core/i18n/hooks";
 
 import { AgentCard } from "./agent-card";
@@ -16,6 +16,9 @@ export function AgentGallery() {
   const router = useRouter();
 
   const templateAgents = agents.filter((agent) => agent.template);
+  const templateButtons: Array<{ name: string }> =
+    templateAgents.length > 0 ? templateAgents : listLocalAgentTemplates();
+
 
   const handleNewAgent = () => {
     router.push("/workspace/agents/new");
@@ -38,7 +41,7 @@ export function AgentGallery() {
       </div>
 
       {/* Template shortcut */}
-      {templateAgents.length > 0 ? (
+      {templateButtons.length > 0 ? (
         <div className="border-b px-6 py-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
@@ -48,14 +51,14 @@ export function AgentGallery() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {templateAgents.map((agent) => (
+              {templateButtons.map((template) => (
                 <Button
-                  key={agent.name}
+                  key={template.name}
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(buildTemplateCreateUrl(agent.name))}
+                  onClick={() => router.push(buildTemplateCreateUrl(template.name))}
                 >
-                  使用 {agent.name}
+                  使用 {template.name}
                 </Button>
               ))}
             </div>
